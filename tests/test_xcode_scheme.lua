@@ -26,23 +26,6 @@
 		xcode.used_ids = { } -- reset the list of generated IDs
 
 		wks, prj1 = test.createWorkspace()
---[[
-		links { "MyProject2" }
-		dependson { "MyProject3" }
-
-		prj2 = test.createproject(wks)
-		kind "StaticLib"
-		configuration "Debug"
-		targetsuffix "-d"
-		configuration {}
-
-		prj3 = test.createproject(wks)
-		kind "SharedLib"
-		links { "MyProject2" }
-		configuration "Debug"
-		targetsuffix "-d"
-		configuration {}
---]]
 	end
 
 	local function prepare()
