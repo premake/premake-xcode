@@ -1028,7 +1028,7 @@
 		for i,v in ipairs(includedirs) do
 			cfg.includedirs[i] = premake.quoted(v)
 		end
-		settings['HEADER_SEARCH_PATHS'] = cfg.includedirs
+		settings['HEADER_SEARCH_PATHS'] = table.join(cfg.includedirs, cfg.sysincludedirs)
 
 		for i,v in ipairs(cfg.libdirs) do
 			cfg.libdirs[i] = premake.project.getrelative(cfg.project, cfg.libdirs[i])
