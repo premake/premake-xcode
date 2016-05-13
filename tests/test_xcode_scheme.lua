@@ -13,26 +13,25 @@
 -- Setup/Teardown
 ---------------------------------------------------------------------------
 
-	local wks, prj1, tr
+	local wks, prj
 
 	function suite.teardown()
 		wks = nil
-		prj1 = nil
-		tr = nil
+		prj = nil
 	end
 
 	function suite.setup()
 		_ACTION = "xcode4"
 		xcode.used_ids = { } -- reset the list of generated IDs
 
-		wks, prj1 = test.createWorkspace()
+		wks = test.createWorkspace()
 	end
 
 	local function prepare()
 		wks = premake.oven.bakeWorkspace(wks)
 		xcode.prepareWorkspace(wks)
-		local prj = premake.workspace.getproject(wks, 1)
-		tr = xcode.buildprjtree(prj)
+		prj = premake.workspace.getproject(wks, 1)
+		local tr = xcode.buildprjtree(prj)
 	end
 
 ---------------------------------------------------------------------------
@@ -41,7 +40,7 @@
 
 	function suite.scheme_header()
 		prepare()
-		scheme.Header(tr)
+		scheme.Header(prj)
 		test.capture [[
 <?xml version="1.0" encoding="UTF-8"?>
 <Scheme
@@ -56,7 +55,7 @@
 
 	function suite.scheme_footer()
 		prepare()
-		scheme.Footer(tr)
+		scheme.Footer(prj)
 		test.capture [[
 </Scheme>
 		]]
@@ -68,7 +67,7 @@
 
 	function suite.scheme_build()
 		prepare()
-		scheme.build(tr)
+		scheme.build(prj)
 		test.capture [[
 <BuildAction
 	parallelizeBuildables = "YES"
@@ -99,7 +98,7 @@
 
 	function suite.scheme_test()
 		prepare()
-		scheme.test(tr)
+		scheme.test(prj)
 		test.capture [[
 <TestAction
 	selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
@@ -127,7 +126,7 @@
 
 	function suite.scheme_launch()
 		prepare()
-		scheme.launch(tr)
+		scheme.launch(prj)
 		test.capture [[
 <LaunchAction
 	selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
@@ -159,7 +158,7 @@
 
 	function suite.scheme_profile()
 		prepare()
-		scheme.profile(tr)
+		scheme.profile(prj)
 		test.capture [[
 <ProfileAction
 	shouldUseLaunchSchemeArgsEnv = "YES"
@@ -186,7 +185,7 @@
 
 	function suite.scheme_analyze()
 		prepare()
-		scheme.analyze(tr)
+		scheme.analyze(prj)
 		test.capture [[
 <AnalyzeAction
 	buildConfiguration = "Debug">
@@ -200,7 +199,7 @@
 
 	function suite.scheme_archive()
 		prepare()
-		scheme.archive(tr)
+		scheme.archive(prj)
 		test.capture [[
 <ArchiveAction
 	buildConfiguration = "Release"

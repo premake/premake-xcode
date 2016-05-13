@@ -53,7 +53,7 @@
 
 		onProject = function(prj)
 			p.generate(prj, ".xcodeproj/project.pbxproj", p.modules.xcode.generateProject)
-			p.generate(prj, ".xcodeproj/xcshareddata/xcschemes/" .. prj.name .. ".xcscheme", p.modules.xcode.generateScheme)
+			p.generate(prj, ".xcodeproj/xcshareddata/xcschemes/" .. prj.name .. ".xcscheme", p.modules.xcode.scheme.generate)
 		end,
 	}
 

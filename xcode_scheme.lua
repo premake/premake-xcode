@@ -15,18 +15,19 @@
     m.scheme = {}
     local scheme = m.scheme
 
-    function scheme.Header(tr)
+    function scheme.Header(prj)
         p.w('<?xml version="1.0" encoding="UTF-8"?>')
         p.push('<Scheme')
         p.w('LastUpgradeVersion = "0500"')
         p.w('version = "1.3">')
     end
 
-    function scheme.Footer(tr)
+    function scheme.Footer(prj)
         p.pop('</Scheme>')
     end
 
-    function scheme.buildablereference(tr)
+    function scheme.buildablereference(prj)
+        local tr = project.getsourcetree(prj)
         for _, node in ipairs(tr.products.children) do
             p.push('<BuildableReference')
             p.w('BuildableIdentifier = "primary"')
@@ -38,7 +39,7 @@
         end
     end
 
-    function scheme.build(tr)
+    function scheme.build(prj)
         p.push('<BuildAction')
         p.w('parallelizeBuildables = "YES"')
         p.w('buildImplicitDependencies = "YES">')
@@ -49,13 +50,13 @@
         p.w('buildForProfiling = "YES"')
         p.w('buildForArchiving = "YES"')
         p.w('buildForAnalyzing = "YES">')
-        scheme.buildablereference(tr)
+        scheme.buildablereference(prj)
         p.pop('</BuildActionEntry>')
         p.pop('</BuildActionEntries>')
         p.pop('</BuildAction>')
     end
 
-    function scheme.test(tr)
+    function scheme.test(prj)
         p.push('<TestAction')
         p.w('selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"')
         p.w('selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"')
@@ -64,12 +65,12 @@
         p.push('<Testables>')
         p.pop('</Testables>')
         p.push('<MacroExpansion>')
-        scheme.buildablereference(tr)
+        scheme.buildablereference(prj)
         p.pop('</MacroExpansion>')
         p.pop('</TestAction>')
     end
 
-    function scheme.launch(tr)
+    function scheme.launch(prj)
         p.push('<LaunchAction')
         p.w('selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"')
         p.w('selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"')
@@ -80,14 +81,14 @@
         p.w('debugDocumentVersioning = "NO"')
         p.w('allowLocationSimulation = "YES">')
         p.push('<BuildableProductRunnable>')
-        scheme.buildablereference(tr)
+        scheme.buildablereference(prj)
         p.pop('</BuildableProductRunnable>')
         p.push('<AdditionalOptions>')
         p.pop('</AdditionalOptions>')
         p.pop('</LaunchAction>')
     end
 
-    function scheme.profile(tr)
+    function scheme.profile(prj)
         p.push('<ProfileAction')
         p.w('shouldUseLaunchSchemeArgsEnv = "YES"')
         p.w('savedToolIdentifier = ""')
@@ -95,18 +96,18 @@
         p.w('buildConfiguration = "Release"')
         p.w('debugDocumentVersioning = "NO">')
         p.push('<BuildableProductRunnable>')
-        scheme.buildablereference(tr)
+        scheme.buildablereference(prj)
         p.pop('</BuildableProductRunnable>')
         p.pop('</ProfileAction>')
     end
 
-    function scheme.analyze(tr)
+    function scheme.analyze(prj)
         p.push('<AnalyzeAction')
         p.w('buildConfiguration = "Debug">')
         p.pop('</AnalyzeAction>')
     end
 
-    function scheme.archive(tr)
+    function scheme.archive(prj)
         p.push('<ArchiveAction')
         p.w('buildConfiguration = "Release"')
         p.w('revealArchiveInOrganizer = "YES">')
@@ -120,15 +121,20 @@
 --    The Premake project to generate.
 --
 
-    function m.generateScheme(prj)
-        local tr = project.getsourcetree(prj)
-        scheme.Header(tr)
-        scheme.build(tr)
-        scheme.test(tr)
-        scheme.launch(tr)
-        scheme.profile(tr)
-        scheme.analyze(tr)
-        scheme.archive(tr)
-        scheme.Footer(tr)
+    m.scheme.project = function(prj)
+        return {
+            scheme.Header,
+            scheme.build,
+            scheme.test,
+            scheme.launch,
+            scheme.profile,
+            scheme.analyze,
+            scheme.archive,
+            scheme.Footer,
+        }
+    end
+
+    function m.scheme.generate(prj)
+        p.callArray(m.scheme.project, prj)
     end
 
