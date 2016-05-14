@@ -23,7 +23,7 @@
 	end
 
 	function suite.setup()
-		_ACTION = "xcode4"
+		premake.action.set("xcode4")
 		xcode.used_ids = { } -- reset the list of generated IDs
 
 		wks, prj1 = test.createWorkspace()
@@ -45,11 +45,9 @@
 	end
 
 	local function prepare()
-		wks = premake.oven.bakeWorkspace(wks)
 		xcode.prepareWorkspace(wks)
-		local prj3 = premake.workspace.getproject(wks, 1)
-		--prj2 = test.getproject(wks, 2)
-		tr = xcode.buildprjtree(prj3)
+		local prj = test.getproject(wks, 1)
+		tr = xcode.buildprjtree(prj)
 	end
 
 
