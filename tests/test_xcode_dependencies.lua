@@ -12,13 +12,12 @@
 -- Setup/Teardown
 ---------------------------------------------------------------------------
 
-	local wks, prj1, prj2, prj3, tr
+	local wks, prj, prj2, tr
 
 	function suite.teardown()
 		wks = nil
-		prj1 = nil
+		prj = nil
 		prj2 = nil
-		prj3 = nil
 		tr = nil
 	end
 
@@ -26,7 +25,7 @@
 		premake.action.set("xcode4")
 		xcode.used_ids = { } -- reset the list of generated IDs
 
-		wks, prj1 = test.createWorkspace()
+		wks, prj = test.createWorkspace()
 		links { "MyProject2" }
 		dependson { "MyProject3" }
 
@@ -36,7 +35,7 @@
 		targetsuffix "-d"
 		configuration {}
 
-		prj3 = test.createproject(wks)
+		local prj3 = test.createproject(wks)
 		kind "SharedLib"
 		links { "MyProject2" }
 		configuration "Debug"
@@ -46,8 +45,8 @@
 
 	local function prepare()
 		xcode.prepareWorkspace(wks)
-		local prj = test.getproject(wks, 1)
-		tr = xcode.buildprjtree(prj)
+		local prj1 = test.getproject(wks, 1)
+		tr = xcode.buildprjtree(prj1)
 	end
 
 
@@ -66,7 +65,7 @@
 	end
 
 	function suite.PBXBuildFile_ListsDependencyTargets_OnSharedLib()
-		prj2.kind="SharedLib"
+		prj2.kind = "SharedLib"
 		prepare()
 		xcode.PBXBuildFile(tr)
 		test.capture [[
@@ -137,13 +136,12 @@
 
 	function suite.PBXFileReference_UsesRelativePaths()
 		prj.location = "MyProject"
-		prj2.location = ".."
 		prepare()
 		xcode.PBXFileReference(tr)
 		test.capture [[
 /* Begin PBXFileReference section */
 		[MyProject2.xcodeproj] /* libMyProject2-d.a */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "MyProject2.xcodeproj"; path = ../MyProject2.xcodeproj; sourceTree = SOURCE_ROOT; };
-		[MyProject3.xcodeproj] /* libMyProject3-d.dylib */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "MyProject3.xcodeproj"; path = MyProject3.xcodeproj; sourceTree = SOURCE_ROOT; };
+		[MyProject3.xcodeproj] /* libMyProject3-d.dylib */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "MyProject3.xcodeproj"; path = ../MyProject3.xcodeproj; sourceTree = SOURCE_ROOT; };
 		[MyProject:product] /* MyProject */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = MyProject; path = MyProject; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 		]]
