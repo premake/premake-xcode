@@ -67,7 +67,7 @@
 ---------------------------------------------------------------------------
 
 	function suite.XCBuildConfigurationProject_OnSymbols()
-		flags { "Symbols" }
+		symbols "On"
 		prepare()
 		xcode.XCBuildConfiguration_Project(tr, tr.configs[1])
 		test.capture [[

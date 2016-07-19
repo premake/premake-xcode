@@ -884,7 +884,7 @@
 
 		settings['ALWAYS_SEARCH_USER_PATHS'] = 'NO'
 
-		if not cfg.flags.Symbols then
+		if not (cfg.symbols == p.ON) then
 			settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf-with-dsym'
 		end
 
@@ -983,7 +983,7 @@
 
 		settings['CONFIGURATION_TEMP_DIR'] = '$(OBJROOT)'
 
-		if cfg.flags.Symbols then
+		if cfg.symbols == p.ON then
 			settings['COPY_PHASE_STRIP'] = 'NO'
 		end
 
@@ -997,7 +997,7 @@
 			settings['GCC_ENABLE_CPP_RTTI'] = 'NO'
 		end
 
-		if cfg.flags.Symbols and not cfg.flags.NoEditAndContinue then
+		if cfg.symbols == p.ON and not cfg.flags.NoEditAndContinue then
 			settings['GCC_ENABLE_FIX_AND_CONTINUE'] = 'YES'
 		end
 
@@ -1034,7 +1034,7 @@
 			cfg.libdirs[i] = premake.project.getrelative(cfg.project, cfg.libdirs[i])
 		end
 		settings['LIBRARY_SEARCH_PATHS'] = cfg.libdirs
-		
+
 		for i,v in ipairs(cfg.frameworkdirs) do
 			cfg.frameworkdirs[i] = premake.project.getrelative(cfg.project, cfg.frameworkdirs[i])
 		end
