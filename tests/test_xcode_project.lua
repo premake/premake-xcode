@@ -1012,7 +1012,7 @@
 
 
 	function suite.XCBuildConfigurationTarget_OnSymbols()
-		flags { "Symbols" }
+		symbols "On"
 		prepare()
 		xcode.XCBuildConfiguration_Target(tr, tr.products.children[1], tr.configs[1])
 		test.capture [[
@@ -1523,7 +1523,8 @@
 
 
 	function suite.XCBuildConfigurationProject_OnNoEditAndContinue()
-		flags { "Symbols", "NoEditAndContinue" }
+		flags { "NoEditAndContinue" }
+		symbols "On"
 		prepare()
 		xcode.XCBuildConfiguration_Project(tr, tr.configs[1])
 		test.capture [[
@@ -1661,7 +1662,7 @@
 
 
 	function suite.XCBuildConfigurationProject_OnSymbols()
-		flags { "Symbols" }
+		symbols "On"
 		prepare()
 		xcode.XCBuildConfiguration_Project(tr, tr.configs[1])
 		test.capture [[
@@ -2052,7 +2053,7 @@ function suite.releaseBuild_onlyDefaultArch_equalsNo()
 end
 
 function suite.debugBuild_onlyDefaultArch_equalsYes()
-	flags { "Symbols" }
+	symbols "On"
 	prepare()
 	xcode.XCBuildConfiguration_Project(tr, tr.configs[1])
 
