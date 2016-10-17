@@ -884,7 +884,7 @@
 
 		settings['ALWAYS_SEARCH_USER_PATHS'] = 'NO'
 
-		if not (cfg.symbols == p.ON) then
+		if cfg.symbols ~= p.OFF then
 			settings['DEBUG_INFORMATION_FORMAT'] = 'dwarf-with-dsym'
 		end
 
@@ -983,7 +983,8 @@
 
 		settings['CONFIGURATION_TEMP_DIR'] = '$(OBJROOT)'
 
-		if cfg.symbols == p.ON then
+		local isOptimized = config.isOptimizedBuild(cfg)
+		if cfg.symbols == p.ON and not isOptimized then
 			settings['COPY_PHASE_STRIP'] = 'NO'
 		end
 
