@@ -983,8 +983,7 @@
 
 		settings['CONFIGURATION_TEMP_DIR'] = '$(OBJROOT)'
 
-		local isOptimized = config.isOptimizedBuild(cfg)
-		if cfg.symbols == p.ON and not isOptimized then
+		if config.isDebugBuild(cfg) then
 			settings['COPY_PHASE_STRIP'] = 'NO'
 		end
 
