@@ -88,7 +88,7 @@
 
 		-- the special folder "Projects" lists sibling project dependencies
 		 tr.projects = tree.new("Projects")
-		 for _, dep in ipairs(project.getdependencies(prj, "sibling", "object")) do
+		 for _, dep in ipairs(project.getdependencies(prj)) do
 		 	-- create a child node for the dependency's xcodeproj
 		 	local xcpath = xcode.getxcodeprojname(dep)
 		 	local xcnode = tree.insert(tr.projects, tree.new(path.getname(xcpath)))
@@ -98,6 +98,7 @@
 		 	xcnode.productproxyid = xcode.newid(xcnode.name, "prodprox")
 		 	xcnode.targetproxyid  = xcode.newid(xcnode.name, "targprox")
 		 	xcnode.targetdependid = xcode.newid(xcnode.name, "targdep")
+			xcnode.not_a_link_dependency = not table.contains(project.getdependencies(prj, "linkOnly"), dep)
 
 			-- create a grandchild node for the dependency's link target
 		 	local lprj = premake.workspace.findproject(prj.workspace, dep.name)
@@ -105,6 +106,7 @@
 		 	node = tree.insert(xcnode, tree.new(cfg.linktarget.name))
 		 	node.path = cfg.linktarget.fullpath
 		 	node.cfg = cfg
+			node.not_a_link_dependency = xcnode.not_a_link_dependency
 		end
 
 		 if #tr.projects.children > 0 then

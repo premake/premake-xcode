@@ -4,4 +4,5 @@ return {
 	"xcode4_workspace.lua",
 	"xcode_common.lua",
 	"xcode_project.lua",
+	"xcode_scheme.lua",
 }

@@ -15,5 +15,6 @@
 	include("xcode_common.lua")
 	include("xcode4_workspace.lua")
 	include("xcode_project.lua")
+	include("xcode_scheme.lua")
 
 	return m

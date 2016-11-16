@@ -22,24 +22,31 @@
 	end
 
 	function suite.setup()
-		_ACTION = "xcode4"
+		premake.action.set("xcode4")
 		xcode.used_ids = { } -- reset the list of generated IDs
 
 		wks, prj = test.createWorkspace()
 		links { "MyProject2" }
+		dependson { "MyProject3" }
 
 		prj2 = test.createproject(wks)
 		kind "StaticLib"
 		configuration "Debug"
 		targetsuffix "-d"
+		configuration {}
+
+		local prj3 = test.createproject(wks)
+		kind "SharedLib"
+		links { "MyProject2" }
+		configuration "Debug"
+		targetsuffix "-d"
+		configuration {}
 	end
 
 	local function prepare()
-		wks = premake.oven.bakeWorkspace(wks)
 		xcode.prepareWorkspace(wks)
-		local prj3 = premake.workspace.getproject(wks, 1)
-		--prj2 = test.getproject(wks, 2)
-		tr = xcode.buildprjtree(prj3)
+		local prj1 = test.getproject(wks, 1)
+		tr = xcode.buildprjtree(prj1)
 	end
 
 
@@ -58,7 +65,7 @@
 	end
 
 	function suite.PBXBuildFile_ListsDependencyTargets_OnSharedLib()
-		kind "SharedLib"
+		prj2.kind = "SharedLib"
 		prepare()
 		xcode.PBXBuildFile(tr)
 		test.capture [[
@@ -92,6 +99,20 @@
 			remoteGlobalIDString = [libMyProject2-d.a:target];
 			remoteInfo = "libMyProject2-d.a";
 		};
+		[MyProject3.xcodeproj:prodprox] /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = [MyProject3.xcodeproj] /* MyProject3.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = [libMyProject3-d.dylib:product];
+			remoteInfo = "libMyProject3-d.dylib";
+		};
+		[MyProject3.xcodeproj:targprox] /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = [MyProject3.xcodeproj] /* MyProject3.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = [libMyProject3-d.dylib:target];
+			remoteInfo = "libMyProject3-d.dylib";
+		};
 /* End PBXContainerItemProxy section */
 		]]
 	end
@@ -107,6 +128,7 @@
 		test.capture [[
 /* Begin PBXFileReference section */
 		[MyProject2.xcodeproj] /* libMyProject2-d.a */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "MyProject2.xcodeproj"; path = MyProject2.xcodeproj; sourceTree = SOURCE_ROOT; };
+		[MyProject3.xcodeproj] /* libMyProject3-d.dylib */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "MyProject3.xcodeproj"; path = MyProject3.xcodeproj; sourceTree = SOURCE_ROOT; };
 		[MyProject:product] /* MyProject */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = MyProject; path = MyProject; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 		]]
@@ -114,12 +136,12 @@
 
 	function suite.PBXFileReference_UsesRelativePaths()
 		prj.location = "MyProject"
-		prj2.location = "MyProject2"
 		prepare()
 		xcode.PBXFileReference(tr)
 		test.capture [[
 /* Begin PBXFileReference section */
 		[MyProject2.xcodeproj] /* libMyProject2-d.a */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "MyProject2.xcodeproj"; path = ../MyProject2.xcodeproj; sourceTree = SOURCE_ROOT; };
+		[MyProject3.xcodeproj] /* libMyProject3-d.dylib */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "MyProject3.xcodeproj"; path = ../MyProject3.xcodeproj; sourceTree = SOURCE_ROOT; };
 		[MyProject:product] /* MyProject */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; name = MyProject; path = MyProject; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 		]]
@@ -148,7 +170,7 @@
 	end
 
 	function suite.PBXFrameworksBuildPhase_ListsDependencies_OnSharedLib()
-		kind "SharedLib"
+		prj2.kind="SharedLib"
 		prepare()
 		xcode.PBXFrameworksBuildPhase(tr)
 		test.capture [[
@@ -182,6 +204,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		[MyProject3.xcodeproj:prodgrp] /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				[libMyProject3-d.dylib] /* libMyProject3-d.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		[MyProject] /* MyProject */ = {
 			isa = PBXGroup;
 			children = (
@@ -203,6 +233,7 @@
 			isa = PBXGroup;
 			children = (
 				[MyProject2.xcodeproj] /* MyProject2.xcodeproj */,
+				[MyProject3.xcodeproj] /* MyProject3.xcodeproj */,
 			);
 			name = Projects;
 			sourceTree = "<group>";
@@ -233,6 +264,7 @@
 			);
 			dependencies = (
 				[MyProject2.xcodeproj:targdep] /* PBXTargetDependency */,
+				[MyProject3.xcodeproj:targdep] /* PBXTargetDependency */,
 			);
 			name = MyProject;
 			productInstallPath = "$(HOME)/bin";
@@ -266,6 +298,10 @@
 					ProductGroup = [MyProject2.xcodeproj:prodgrp] /* Products */;
 					ProjectRef = [MyProject2.xcodeproj] /* MyProject2.xcodeproj */;
 				},
+				{
+					ProductGroup = [MyProject3.xcodeproj:prodgrp] /* Products */;
+					ProjectRef = [MyProject3.xcodeproj] /* MyProject3.xcodeproj */;
+				},
 			);
 			projectRoot = "";
 			targets = (
@@ -293,6 +329,13 @@
 			remoteRef = [MyProject2.xcodeproj:prodprox] /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
+		[libMyProject3-d.dylib] /* libMyProject3-d.dylib */ = {
+			isa = PBXReferenceProxy;
+			fileType = "compiled.mach-o.dylib";
+			path = "libMyProject3-d.dylib";
+			remoteRef = [MyProject3.xcodeproj:prodprox] /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
 /* End PBXReferenceProxy section */
 		]]
 	end
@@ -311,6 +354,11 @@
 			isa = PBXTargetDependency;
 			name = "libMyProject2-d.a";
 			targetProxy = [MyProject2.xcodeproj:targprox] /* PBXContainerItemProxy */;
+		};
+		[MyProject3.xcodeproj:targdep] /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "libMyProject3-d.dylib";
+			targetProxy = [MyProject3.xcodeproj:targprox] /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 		]]
