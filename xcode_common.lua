@@ -44,6 +44,9 @@
 		if node.isResource then
 			return "Resources"
 		end
+		if node.ruleid then
+			return "Sources"
+		end
 		return categories[path.getextension(node.name)]
 	end
 
@@ -364,6 +367,57 @@
 -- in the .pbxproj file
 ---------------------------------------------------------------------------
 
+	function xcode.PBXBuildRule( tr )
+		local settings = {};
+		tree.traverse(tr, {
+			onnode = function(node)
+				if node.ruleid then
+					
+					settings[node.ruleid] = function(level)
+						_p(level,'%s /* PBXBuildRule */ = {',node.ruleid)
+						_p(level+1,'isa = PBXBuildRule;')
+						_p(level+1,'name = %s ;',stringifySetting('build ' .. node.name))
+						_p(level+1,'compilerSpec = com.apple.compilers.proxy.script;')
+						_p(level+1,'filePatterns = %s ;',path.getabsolute(node.path))
+						_p(level+1,'fileType = pattern.proxy;')
+						_p(level+1,'isEditable = 1;')
+						local commands = {}
+						local outputs = {}
+						for cfg in project.eachconfig(tr.project) do
+							local filecfg = fileconfig.getconfig(node, cfg)
+							if filecfg then
+								table.insert(commands, 'if [ "${CONFIGURATION}" = "' .. cfg.buildcfg .. '" ]; then')
+								table.insert(commands, string.format('\techo "%s"', filecfg.buildmessage or ("Building " .. filecfg.relpath)))
+								local cmds = os.translateCommands(filecfg.buildcommands)
+								for _, cmd in ipairs(cmds) do
+									table.insert(commands,'\t' .. cmd)
+								end
+								table.insert(commands,'fi')
+								for _,v in ipairs(filecfg.buildoutputs) do
+									outputs[v] = true
+								end
+							end
+						end
+						_p(level+1,'script = %s ;', stringifySetting(table.concat(commands, '\n')))
+						_p(level+1,'outputFiles = (')
+						for v,_ in pairs(outputs) do
+							_p(level+2,' "%s", ',stringifySetting(v))
+						end
+ 						_p(level+1,');')
+						_p(level,'};')
+					end
+				end
+			end
+		})
+
+		if not table.isempty(settings) then
+			_p('/* Begin PBXBuildRule section */')
+			printSettingsTable(2, settings);
+			_p('/* End PBXBuildRule section */')
+			_p('')
+		end
+	end
+
 	function xcode.PBXBuildFile(tr)
 		local settings = {};
 		tree.traverse(tr, {
@@ -600,6 +654,16 @@
 
 
 	function xcode.PBXNativeTarget(tr)
+
+		local buildRules = {}
+		tree.traverse(tr, {
+			onnode = function(node)
+				if node.ruleid then
+					buildRules[node.ruleid] = node
+				end
+			end
+		})
+
 		_p('/* Begin PBXNativeTarget section */')
 		for _, node in ipairs(tr.products.children) do
 			local name = tr.project.name
@@ -639,6 +703,9 @@
 			end
 			_p(3,');')
 			_p(3,'buildRules = (')
+			for ruleid, node in pairs(buildRules) do
+				_p(4,'%s /* PBXBuildRule */,',ruleid)
+			end
 			_p(3,');')
 
 			_p(3,'dependencies = (')
@@ -812,7 +879,7 @@
 			_p(3,'files = (')
 			tree.traverse(tr, {
 				onleaf = function(node)
-					if xcode.getbuildcategory(node) == "Sources" then
+					if xcode.getbuildcategory(node) == "Sources" and node.buildid then
 						_p(4,'%s /* %s in Sources */,', node.buildid, node.name)
 					end
 				end

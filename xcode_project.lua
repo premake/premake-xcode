@@ -111,6 +111,7 @@
 		 	tree.insert(tr, tr.projects)
 		 end
 
+		 local generated = {}
         -- Final setup
 		 tree.traverse(tr, {
 		 	onnode = function(node)
@@ -119,7 +120,24 @@
 
 		 		node.isResource = xcode.isItemResource(prj, node)
 
-		 		-- assign build IDs to buildable files
+		 		
+		 		-- check to see if this file has custom rules
+		 		if node.configs then
+
+					for cfg in project.eachconfig(prj) do
+						local filecfg = fileconfig.getconfig(node, cfg)
+						if fileconfig.hasCustomBuildRule(filecfg) then
+							if not node.ruleid then
+								node.ruleid = xcode.newid(node.name, "rule", node.path)
+							end
+							for _,v in ipairs(filecfg.buildoutputs) do
+								generated[path.getabsolute(v)] = true
+							end
+						end
+					end
+				end
+
+				-- assign build IDs to buildable files
 		 		if xcode.getbuildcategory(node) then
 		 			node.buildid = xcode.newid(node.name, "build", node.path)
 		 		end
@@ -130,6 +148,17 @@
 		 		end
 		 	end
 		 }, true)
+
+		-- remove from build generated files
+		if not table.isempty(generated) then
+			tree.traverse(tr, {
+		 		onnode = function(node)
+		 			if node.buildid and generated[path.getabsolute(node.path)] then
+		 				node.buildid = nil
+		 			end
+		 		end
+		 	},true)
+		end
 
         -- Plug in the product node into the Products folder in the tree. The node
 		-- was built in xcode.prepareWorkspace() in xcode_common.lua; it contains IDs
@@ -159,6 +188,7 @@
 	function m.generateProject(prj)
 		local tr = xcode.buildprjtree(prj)
 		p.callArray(m.elements.project, prj)
+		xcode.PBXBuildRule(tr)
 		xcode.PBXBuildFile(tr)
 		xcode.PBXContainerItemProxy(tr)
 		xcode.PBXFileReference(tr)
