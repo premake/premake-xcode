@@ -23,6 +23,12 @@
 		kind = "list",
 	}
 
+	p.api.register {
+		name = "xcodeembededframeworks",
+		scope = "config",
+		kind = "list",
+	}
+
 
 --
 -- Register the Xcode exporters.

@@ -542,6 +542,32 @@
 		_p('')
 	end
 
+	function xcode.PBXCopyFilesBuildPhase(tr)
+		_p('/* Begin PBXCopyFilesBuildPhase section */')
+		_p(2,'%s /* Embed Frameworks */ = {', tr.products.children[1].efxstageid)
+		_p(3,'isa = PBXCopyFilesBuildPhase;')
+		_p(3,'buildActionMask = 2147483647;')
+		_p(3,'dstPath = "";')
+		_p(3,'dstSubfolderSpec = 10;')
+		_p(3,'files = (')
+
+		-- write out library dependencies
+		tree.traverse(tr.frameworks, {
+			onleaf = function(node)
+				if node.buildid and node.isEmbed then
+					_p(4,'%s /* %s in Embed Frameworks */,', node.buildid, node.name)
+				end
+			end
+		})
+
+		_p(3,');')
+		_p(3,'name = "Embed Frameworks";')
+		_p(3,'runOnlyForDeploymentPostprocessing = 0;')
+		_p(2,'};')
+		_p('/* End PBXFrameworksBuildPhase section */')
+		_p('')
+	end
+
 
 	function xcode.PBXGroup(tr)
 		local settings = {}
@@ -634,6 +660,7 @@
 				_p(4,'9607AE3510C85E7E00CD1376 /* Prelink */,')
 			end
 			_p(4,'%s /* Frameworks */,', node.fxstageid)
+			_p(4,'%s /* Embed Frameworks */,', node.efxstageid)
 			if hasBuildCommands('postbuildcommands') then
 				_p(4,'9607AE3710C85E8F00CD1376 /* Postbuild */,')
 			end
