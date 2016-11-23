@@ -370,8 +370,13 @@
 			onnode = function(node)
 				if node.buildid then
 					settings[node.buildid] = function(level)
-						_p(level,'%s /* %s in %s */ = {isa = PBXBuildFile; fileRef = %s /* %s */; };',
-							node.buildid, node.name, xcode.getbuildcategory(node), node.id, node.name)
+						if node.isWeak then
+							_p(level,'%s /* %s in %s */ = {isa = PBXBuildFile; fileRef = %s /* %s */;  settings = {ATTRIBUTES = (Weak, ); }; };',
+								node.buildid, node.name, xcode.getbuildcategory(node), node.id, node.name)
+						else
+							_p(level,'%s /* %s in %s */ = {isa = PBXBuildFile; fileRef = %s /* %s */; };',
+								node.buildid, node.name, xcode.getbuildcategory(node), node.id, node.name)
+						end
 					end
 				end
 			end

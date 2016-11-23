@@ -73,6 +73,7 @@
 				if xcode.isframework(name) and not tr.frameworks.children[name] then
 					node = tree.insert(tr.frameworks, tree.new(name))
 					node.path = link
+					node.isWeak = (cfg.xcodeweakframeworks or {})[name]
 		 		end
 		 	end
 		 end
